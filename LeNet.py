@@ -56,7 +56,7 @@ def train_one_epoch(model, data_loader, loss_function, optimizer, device):
 
         total_loss += loss.item() * images.size(0)
         total +=labels.size(0)
-        predicted = outputs.argmax(dim=1)        #
+        predicted = outputs.argmax(dim=1)        
         correct += (predicted == labels).sum().item()
 
     average_loss = total_loss / total
@@ -183,5 +183,4 @@ def main():
 if __name__ == "__main__":
     main()
     
-
 
