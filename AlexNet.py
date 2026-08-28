@@ -18,18 +18,18 @@ from torchvision.models import alexnet, AlexNet_Weights
 
 
 # FashionMNIST 的十个类别
-CLASS_NAMES = [
-    "T-shirt/top",  # 0：T恤
-    "Trouser",      # 1：裤子
-    "Pullover",     # 2：套头衫
-    "Dress",        # 3：连衣裙
-    "Coat",         # 4：外套
-    "Sandal",       # 5：凉鞋
-    "Shirt",        # 6：衬衫
-    "Sneaker",      # 7：运动鞋
-    "Bag",          # 8：包
-    "Ankle boot"    # 9：短靴
-]
+# CLASS_NAMES = [
+#     "T-shirt/top",  # 0：T恤
+#     "Trouser",      # 1：裤子
+#     "Pullover",     # 2：套头衫
+#     "Dress",        # 3：连衣裙
+#     "Coat",         # 4：外套
+#     "Sandal",       # 5：凉鞋
+#     "Shirt",        # 6：衬衫
+#     "Sneaker",      # 7：运动鞋
+#     "Bag",          # 8：包
+#     "Ankle boot"    # 9：短靴
+# ]
 
 
 # 定义训练一个 epoch 的函数
@@ -55,40 +55,30 @@ def train_one_epoch(
     # 一批一批地读取训练数据
     for images, labels in data_loader:
 
-        # 把图片移动到 GPU 或 CPU
+        # 把图片移到GPU
         images = images.to(
             device,
             non_blocking=True
         )
-
-        # 把标签移动到 GPU 或 CPU
         labels = labels.to(
             device,
             non_blocking=True
         )
 
-        # 清空上一个批次留下的梯度
         optimizer.zero_grad()
 
-        # 把图片输入模型，得到预测结果
         outputs = model(images)
 
-        # 计算预测结果和真实标签之间的损失
         loss = loss_function(outputs, labels)
 
-        # 反向传播，计算各个参数的梯度
         loss.backward()
 
-        # 根据梯度更新模型参数
         optimizer.step()
 
-        # images.size(0) 是当前批次的图片数量
+        # 当前批次的图片数量
         batch_size = images.size(0)
 
-        # 累加当前批次的总损失
         total_loss += loss.item() * batch_size
-
-        # 累加图片数量
         total += batch_size
 
         # 在十个类别中找到分数最高的类别
@@ -116,70 +106,37 @@ def evaluate(
 ):
     # 切换到测试模式
     model.eval()
-
-    # 记录总损失
     total_loss = 0.0
-
-    # 记录样本总数
-    total = 0
-
-    # 记录预测正确的数量
-    correct = 0
-
-    # 测试时不需要计算梯度
+    total, correct = 0, 0
     with torch.no_grad():
-
-        # 一批一批读取测试数据
         for images, labels in data_loader:
 
-            # 把图片移动到 GPU 或 CPU
             images = images.to(
                 device,
                 non_blocking=True
             )
-
-            # 把标签移动到 GPU 或 CPU
             labels = labels.to(
                 device,
                 non_blocking=True
             )
 
-            # 前向传播
             outputs = model(images)
-
-            # 计算损失
             loss = loss_function(outputs, labels)
-
-            # 当前批次的图片数量
             batch_size = images.size(0)
-
-            # 累加损失
             total_loss += loss.item() * batch_size
-
-            # 累加图片数量
             total += batch_size
-
-            # 找到预测类别
             predicted = outputs.argmax(dim=1)
-
-            # 累加预测正确数量
             correct += (predicted == labels).sum().item()
 
-    # 计算平均损失
     average_loss = total_loss / total
-
-    # 计算准确率
     accuracy = 100.0 * correct / total
-
-    # 返回测试损失和测试准确率
     return average_loss, accuracy
-
 
 # 定义主函数
 def main():
 
     # 固定随机种子，使每次运行的结果更容易复现
-    torch.manual_seed(42)
+    # torch.manual_seed(42)
 
     # 如果 CUDA 可用就使用 GPU，否则使用 CPU
     device = torch.device(
@@ -281,17 +238,9 @@ def main():
     # 创建训练数据加载器
     train_loader = DataLoader(
         dataset=train_dataset,
-
-        # 每次取出 64 张图片
         batch_size=64,
-
-        # 训练集需要打乱
         shuffle=True,
-
-        # Windows 初学阶段建议使用 0，避免多进程问题
         num_workers=0,
-
-        # 使用 GPU 时可以提高数据传输效率
         pin_memory=use_pin_memory
     )
 
@@ -299,13 +248,8 @@ def main():
     test_loader = DataLoader(
         dataset=test_dataset,
         batch_size=64,
-
-        # 测试集不需要打乱
         shuffle=False,
-
-        # Windows 下先设为 0
         num_workers=0,
-
         # 使用 GPU 时开启锁页内存
         pin_memory=use_pin_memory
     )
@@ -371,11 +315,11 @@ def main():
     )
 
     # 最大训练轮数
-    epochs = 25
+    epochs = 20
 
     # 保存当前最佳测试准确率
     best_accuracy = 0.0
-
+    
     # 开始训练
     for epoch in range(epochs):
 
@@ -414,37 +358,27 @@ def main():
             f"test accuracy={test_accuracy:.2f}%"
         )
 
-        # 如果当前测试准确率超过历史最佳值
         if test_accuracy > best_accuracy:
-
-            # 更新最佳准确率
             best_accuracy = test_accuracy
 
-            # 保存模型参数
             torch.save(
                 model.state_dict(),
                 "best_alexnet_fashionmnist.pth"
             )
 
-            # 提示已经保存
             print(
                 f"保存最佳模型，准确率："
                 f"{best_accuracy:.2f}%"
             )
 
-    # 输出最终最佳准确率
     print(
         f"\n训练结束，最佳测试准确率："
         f"{best_accuracy:.2f}%"
     )
-
-    # 输出模型文件名
     print(
         "模型已保存为："
         "best_alexnet_fashionmnist.pth"
     )
 
-
-# 只有直接运行 main.py 时才执行 main()
 if __name__ == "__main__":
     main()
