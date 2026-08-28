@@ -11,9 +11,15 @@ wheels/
 # 虚拟环境
 .venv/
 
-# 数据集和测试图片
-data/
-my_photo/
+# 数据集、测试图片
+LeNet/data/
+LeNet/my_photo
+AlexNet/data
+AlexNet/my_photo
+ResNet/data
+ResNet/my_photo
+bili/
+
 
 # 模型文件
 *.pth

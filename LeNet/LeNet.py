@@ -105,13 +105,14 @@ def main():
         root="./data", 
         train = True,
         download = True,
-        transform = transform
+        transform = transform,
         )
+
     test_dataset = torchvision.datasets.CIFAR10(
             root="./data", 
             train = False,
             download = True,
-            transform = transform
+            transform = transform,
         )
     
     train_loader = DataLoader(
@@ -182,5 +183,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-

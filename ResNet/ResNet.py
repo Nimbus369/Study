@@ -70,18 +70,6 @@ def train_one_epoch(
 ):
     # 也与 BN 有关
     model.train()
-
-    # 如果主干被冻结，BatchNorm 的参数虽然不会求梯度，
-    # 但 train() 仍可能更新它的 running mean/running variance。
-    # 这里把主干切换到 eval()，使“冻结主干”真正保持固定。
-    # if FREEZE_BACKBONE:
-    #     model.conv1.eval()
-    #     model.bn1.eval()
-    #     model.layer1.eval()
-    #     model.layer2.eval()
-    #     model.layer3.eval()
-    #     model.layer4.eval()
-
     total_loss = 0.0
     total = 0
     correct = 0
@@ -289,7 +277,5 @@ def main():
     print(f"最佳验证准确率：{best_accuracy:.2f}%")
     print(f"模型已保存为：{MODEL_PATH}")
 
-
-# 只有直接运行 python ResNet.py 时，才执行 main()
 if __name__ == "__main__":
     main()
